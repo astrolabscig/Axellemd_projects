@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>DataWise · Buy data simulator</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📶</text></svg>">
+<style>
+:root{
+  --bg:#E9F1EE;--ink:#0F2A26;--muted:#4C6560;--accent:#0F766E;--accent-ink:#FFFFFF;--line:#C9D8D3;--card:#FFFFFF;
+  --phone:#0B0B0C;--popup:#2A2A2D;--pop-ink:#F3F3F3;--key:#3A3A3E;--key-ink:#F3F3F3;--err:#FF8A80;--call:#1E9E63;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0C1614;--ink:#E3EEEB;--muted:#9BB3AE;--accent:#34B3A5;--accent-ink:#04120F;--line:#24342F;--card:#13201D}}
+:root[data-theme="dark"]{--bg:#0C1614;--ink:#E3EEEB;--muted:#9BB3AE;--accent:#34B3A5;--accent-ink:#04120F;--line:#24342F;--card:#13201D}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.5}
+main{max-width:420px;margin:0 auto;padding:20px 14px 32px}
+.brand{display:flex;align-items:center;gap:10px;margin:0 0 4px}
+.logo{width:34px;height:34px;border-radius:10px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-weight:800;font-size:15px}
+.brand h1{font-size:22px;margin:0;letter-spacing:-.01em}
+.sub{color:var(--muted);font-size:14px;margin:0 0 16px}
+.phone{background:var(--phone);border-radius:30px;padding:14px 12px 16px;min-height:600px;display:flex;flex-direction:column;box-shadow:0 10px 30px rgba(0,0,0,.18)}
+.status{display:flex;justify-content:space-between;color:#EDEDED;font-size:13px;padding:0 8px 10px}
+.stage{flex:1;display:flex;flex-direction:column;justify-content:center}
+.dialer{text-align:center;color:#EDEDED}
+.dialer .code{font-size:40px;letter-spacing:.04em;margin:30px 0 8px}
+.dialer .hint{color:#A7A7AD;font-size:14px;margin:0 0 28px}
+.callbtn{width:72px;height:72px;border-radius:50%;border:0;background:var(--call);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.callbtn:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.popup{background:var(--popup);color:var(--pop-ink);border-radius:24px;padding:20px 20px 10px;margin:0 2px}
+.msg{white-space:pre-line;font-size:17px;line-height:1.45;margin:0 0 14px;min-height:40px}
+.err{color:var(--err);font-size:15px;margin:0 0 6px}
+.err:empty{display:none}
+.popup input{width:100%;background:transparent;border:0;border-bottom:2px solid var(--pop-ink);color:var(--pop-ink);font:inherit;font-size:20px;padding:6px 2px;outline:none}
+.popup input:focus{border-bottom-color:#7FD8CC}
+.pbtns{display:flex;margin-top:12px}
+.pbtns button{flex:1;background:none;border:0;color:var(--pop-ink);font:inherit;font-size:18px;font-weight:700;padding:12px 0;cursor:pointer;border-radius:12px}
+.pbtns button:focus-visible{outline:2px solid #7FD8CC}
+.pbtns .sep{width:1px;background:#555;margin:10px 0}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px;padding:0 4px}
+.keypad button{background:var(--key);color:var(--key-ink);border:0;border-radius:12px;font:inherit;font-size:22px;padding:10px 0;cursor:pointer}
+.keypad button:active{filter:brightness(1.3)}
+.keypad button:focus-visible{outline:2px solid #7FD8CC}
+.log{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:16px;font-size:14px}
+.log h2{font-size:15px;margin:0 0 8px}
+.log dl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:0 0 12px}
+.log dt{color:var(--muted)}
+.log dd{margin:0;word-break:break-word}
+.lbtns{display:flex;gap:8px;flex-wrap:wrap}
+.lbtn{font:inherit;font-size:14px;font-weight:700;border-radius:10px;padding:10px 12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;text-decoration:none;text-align:center;flex:1}
+.lbtn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.foot{color:var(--muted);font-size:12px;margin-top:18px;text-align:center}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+  <div class="brand"><div class="logo">DW</div><h1>DataWise</h1></div>
+  <p class="sub">A better way to buy data on any phone. Dial, then type the number of your choice.</p>
+
+  <div class="phone">
+    <div class="status"><span id="clock">12:00</span><span>▮▮▮ 4G</span></div>
+    <div class="stage">
+      <div class="dialer" id="dialer">
+        <p class="code">*400#</p>
+        <p class="hint">Tap the green button to dial</p>
+        <button class="callbtn" id="dialBtn" aria-label="Dial *400#">Dial</button>
+      </div>
+
+      <div id="ussd" hidden>
+        <div class="popup" role="dialog" aria-live="polite">
+          <p class="err" id="err"></p>
+          <p class="msg" id="msg"></p>
+          <div id="inputWrap">
+            <input id="inp" inputmode="decimal" autocomplete="off" aria-label="Your choice">
+            <div class="pbtns"><button id="cancelBtn">Cancel</button><span class="sep"></span><button id="sendBtn">Send</button></div>
+          </div>
+          <div id="okWrap" hidden>
+            <div class="pbtns"><button id="okBtn">OK</button></div>
+          </div>
+        </div>
+        <div class="keypad" id="keypad" aria-label="Number keypad">
+          <button>1</button><button>2</button><button>3</button>
+          <button>4</button><button>5</button><button>6</button>
+          <button>7</button><button>8</button><button>9</button>
+          <button>.</button><button>0</button><button aria-label="Delete">⌫</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="log" id="logBox" hidden>
+    <h2>Test result</h2>
+    <dl>
+      <dt>Inputs</dt><dd id="lgInputs">0</dd>
+      <dt>Path</dt><dd id="lgPath">—</dd>
+      <dt>Result</dt><dd id="lgResult">—</dd>
+      <dt>Time</dt><dd id="lgTime">—</dd>
+    </dl>
+    <div class="lbtns">
+      <a class="lbtn primary" id="shareBtn" href="#" target="_blank" rel="noopener">Send result on WhatsApp</a>
+      <button class="lbtn" id="copyBtn">Copy result</button>
+    </div>
+  </section>
+
+  <p class="foot">Prototype by Joseph Boafo Afful for The Master Study. Sample prices; nothing is ever charged.</p>
+</main>
+
+<script>
+(function(){
+  // Sample prices. Regular bundles never expire. "Any amount" uses one fixed rate.
+  var BUNDLES = [
+    {p:0.5, mb:20.73}, {p:1, mb:41.46}, {p:3, mb:406.89},
+    {p:10, mb:837.55}, {p:350, mb:108210}, {p:399, mb:217340}
+  ];
+  var RATE = 104.21; // MB per cedi for "any amount"
+  var MIN_AMT = 0.5, MAX_AMT = 399;
+  var TARGETS = {"1":{mb:100,label:"about 100MB"},"2":{mb:500,label:"about 500MB"},"3":{mb:1000,label:"about 1GB"},"4":{mb:100000,label:"100GB or more"}};
+  var LAST = {p:3, mb:406.89, kind:"bundle"};
+
+  var $ = function(id){return document.getElementById(id)};
+  var S = {};
+
+  function money(p){ return "GH₵" + (Math.round(p*100)%100===0 ? String(Math.round(p)) : p.toFixed(2)); }
+  function data(mb){
+    if (mb >= 1000){ var g = mb/1000; var s = g >= 10 ? Math.round(g).toString() : g.toFixed(1).replace(/\.0$/,""); return s + "GB"; }
+    return Math.round(mb) + "MB";
+  }
+  function label(o){ return o.kind === "flexi" ? money(o.p) + " any amount = " + data(o.mb) : money(o.p) + " = " + data(o.mb); }
+
+  function reset(){
+    S = {screen:"dial", inputs:0, path:[], start:null, options:[], sel:null, prev:null, number:null, result:null, budget:null, target:null};
+    $("dialer").hidden = false; $("ussd").hidden = true; $("logBox").hidden = true;
+  }
+
+  function show(text, opts){
+    opts = opts || {};
+    $("msg").textContent = text;
+    $("err").textContent = opts.error || "";
+    $("inputWrap").hidden = !!opts.final;
+    $("okWrap").hidden = !opts.final;
+    $("keypad").hidden = !!opts.final;
+    $("inp").value = "";
+    if (!opts.final){ try{ $("inp").focus({preventScroll:true}); }catch(e){} }
+    else { $("okBtn").focus(); }
+  }
+
+  function home(err){
+    S.screen = "home";
+    show("Buy data. How much do you need?\n1 About 100MB\n2 About 500MB\n3 About 1GB\n4 100GB or more\n5 Type my budget\n6 Buy again: " + label(LAST) + "\n0 Exit", {error:err});
+  }
+
+  function answer(err){
+    S.screen = "answer";
+    var t = S.target, opts = [];
+    var fp = Math.ceil(t.mb / RATE * 10) / 10;
+    if (fp <= MAX_AMT) opts.push({p:fp, mb:fp*RATE, kind:"flexi"});
+    BUNDLES.forEach(function(b){ if (b.mb >= t.mb) opts.push({p:b.p, mb:b.mb, kind:"bundle"}); });
+    opts.sort(function(a,b){ return a.p - b.p; });
+    S.options = opts.slice(0,2);
+    var lines = ["Cheapest for " + t.label + ":"];
+    S.options.forEach(function(o,i){ lines.push((i+1) + " " + label(o) + (i===0 ? " ★" : "")); });
+    lines.push("★ cheapest · All: no expiry", "0 Back");
+    show(lines.join("\n"), {error:err});
+  }
+
+  function budgetAsk(err){
+    S.screen = "budget";
+    show("Type the amount you want to spend in GH₵\n(" + money(MIN_AMT) + " to " + money(MAX_AMT) + ")\n0 Back", {error:err});
+  }
+
+  function budgetAnswer(err){
+    S.screen = "budgetAnswer";
+    var B = S.budget;
+    var flexi = {p:B, mb:B*RATE, kind:"flexi"};
+    var under = BUNDLES.filter(function(b){ return b.p <= B; }).sort(function(a,b){ return b.mb - a.mb; })[0];
+    var within = [flexi];
+    if (under) within.push({p:under.p, mb:under.mb, kind:"bundle"});
+    within.sort(function(a,b){ return b.mb - a.mb; });
+    var opts = within.slice();
+    var tip = BUNDLES.filter(function(b){ return b.p > B && b.mb > within[0].mb && b.p <= B*2 + 5; }).sort(function(a,b){ return a.p - b.p; })[0];
+    if (tip) opts.push({p:tip.p, mb:tip.mb, kind:"bundle", tip:true});
+    S.options = opts;
+    var lines = ["Best for " + money(B) + ":"];
+    opts.forEach(function(o,i){
+      var extra = o.tip ? " (+" + money(o.p - B) + ")" : (i===0 ? " ★" : "");
+      lines.push((i+1) + " " + label(o) + extra);
+    });
+    lines.push("★ most data · All: no expiry", "0 Back");
+    show(lines.join("\n"), {error:err});
+  }
+
+  function summary(err){
+    S.screen = "summary";
+    var o = S.sel;
+    show("You're buying " + data(o.mb) + " for " + money(o.p) + "\nNo expiry · For " + (S.number || "this number") + "\n1 Pay with airtime\n2 Pay with MoMo\n9 Change number\n0 Back", {error:err});
+  }
+
+  function changeNum(err){
+    S.screen = "changeNum";
+    show("Type the 10-digit number that should get the data\n0 Back", {error:err});
+  }
+
+  function finish(method){
+    S.screen = "done";
+    var o = S.sel, who = S.number || "this number";
+    S.result = data(o.mb) + " for " + money(o.p) + " via " + method + (S.number ? " (for " + S.number + ")" : "");
+    var text = method === "airtime"
+      ? "Done! " + data(o.mb) + " added to " + who + ". No expiry.\n\nThis is a demo. Nothing was charged."
+      : "Request sent. Approve the MoMo prompt with your PIN to finish.\nNever share your PIN with anyone.\n\nThis is a demo. Nothing was charged.";
+    show(text, {final:true});
+    showLog();
+  }
+
+  function closed(text){
+    S.screen = "closed";
+    if (!S.result) S.result = "Left without buying";
+    show(text, {final:true});
+    showLog();
+  }
+
+  function showLog(){
+    var secs = S.start ? Math.round((Date.now() - S.start)/1000) : 0;
+    $("lgInputs").textContent = String(S.inputs);
+    $("lgPath").textContent = S.path.length ? S.path.join(" → ") : "—";
+    $("lgResult").textContent = S.result || "—";
+    $("lgTime").textContent = secs + " seconds";
+    $("shareBtn").href = "https://wa.me/?text=" + encodeURIComponent(logText());
+    $("copyBtn").textContent = "Copy result";
+    $("logBox").hidden = false;
+  }
+  function logText(){
+    return "DataWise test result\nInputs: " + $("lgInputs").textContent + "\nPath: " + $("lgPath").textContent + "\nResult: " + $("lgResult").textContent + "\nTime: " + $("lgTime").textContent;
+  }
+
+  function pick(v){
+    var i = parseInt(v,10) - 1;
+    if (/^\d$/.test(v) && i >= 0 && i < S.options.length){ S.sel = S.options[i]; S.prev = S.screen; summary(); return true; }
+    return false;
+  }
+
+  function redraw(err){
+    ({home:home, answer:answer, budget:budgetAsk, budgetAnswer:budgetAnswer, summary:summary, changeNum:changeNum})[S.screen](err);
+  }
+
+  function send(){
+    var v = $("inp").value.trim();
+    if (!v) { redraw("Type a number, then press Send."); return; }
+    S.inputs++; S.path.push(v);
+    if (v === "00") { home(); return; }
+    var bad = "That's not an option. Try again.";
+    switch (S.screen){
+      case "home":
+        if (TARGETS[v]) { S.target = TARGETS[v]; answer(); }
+        else if (v === "5") budgetAsk();
+        else if (v === "6") { S.sel = LAST; S.prev = "home"; summary(); }
+        else if (v === "0") closed("You've left the menu. Dial again any time.");
+        else home(bad);
+        break;
+      case "answer":
+        if (v === "0") home(); else if (!pick(v)) answer(bad);
+        break;
+      case "budget":
+        if (v === "0") { home(); break; }
+        var n = parseFloat(v);
+        if (!/^\d+(\.\d{1,2})?$/.test(v) || isNaN(n) || n < MIN_AMT || n > MAX_AMT) budgetAsk("Type an amount from " + money(MIN_AMT) + " to " + money(MAX_AMT) + ".");
+        else { S.budget = n; budgetAnswer(); }
+        break;
+      case "budgetAnswer":
+        if (v === "0") budgetAsk(); else if (!pick(v)) budgetAnswer(bad);
+        break;
+      case "summary":
+        if (v === "1") finish("airtime");
+        else if (v === "2") finish("MoMo");
+        else if (v === "9") changeNum();
+        else if (v === "0") { S.number = null; ({home:home, answer:answer, budgetAnswer:budgetAnswer})[S.prev](); }
+        else summary(bad);
+        break;
+      case "changeNum":
+        if (v === "0") summary();
+        else if (/^0\d{9}$/.test(v)) { S.number = v; summary(); }
+        else changeNum("Type 10 digits starting with 0, e.g. 0241234567.");
+        break;
+    }
+  }
+
+  $("dialBtn").addEventListener("click", function(){
+    S.start = Date.now();
+    $("dialer").hidden = true; $("ussd").hidden = false;
+    home();
+  });
+  $("sendBtn").addEventListener("click", send);
+  $("inp").addEventListener("keydown", function(e){ if (e.key === "Enter") { e.preventDefault(); send(); } });
+  $("cancelBtn").addEventListener("click", function(){ S.path.push("Cancel"); closed("Cancelled. Nothing was bought."); });
+  $("okBtn").addEventListener("click", reset);
+  $("keypad").addEventListener("click", function(e){
+    var b = e.target.closest("button"); if (!b) return;
+    var inp = $("inp");
+    if (b.getAttribute("aria-label") === "Delete") inp.value = inp.value.slice(0,-1);
+    else inp.value += b.textContent;
+  });
+  $("copyBtn").addEventListener("click", function(){
+    var t = logText();
+    function done(){ $("copyBtn").textContent = "Copied"; }
+    function fallback(){ var r = document.createRange(); r.selectNodeContents($("logBox")); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); $("copyBtn").textContent = "Selected, now copy"; }
+    try { if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done, fallback); else fallback(); } catch(e){ fallback(); }
+  });
+
+  function tick(){ var d = new Date(); $("clock").textContent = String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0"); }
+  tick(); setInterval(tick, 30000);
+  reset();
+})();
+</script>
+</body>
+</html>
