@@ -1,0 +1,8 @@
+/* Design tokens adapted from the Starbucks DESIGN.md (docs/DESIGN.md). */
+:root{--bg:#f2f0eb;--card:#ffffff;--ink:rgba(0,0,0,0.87);--soft:rgba(0,0,0,0.62);--brand:#006241;--accent:#00754A;--house:#1E3932;--light:#d4e9e2;--gold:#cba258;--gold-lightest:#faf6ee;--on:#ffffff;--shadow:0 0 0.5px rgba(0,0,0,0.14),0 1px 1px rgba(0,0,0,0.24);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14231f;--card:#1E3932;--ink:#ffffff;--soft:rgba(255,255,255,0.72);--brand:#d4e9e2;--accent:#00754A;--house:#d4e9e2;--light:#2b5148;--on:#ffffff;--shadow:none}
+}
+
+:root[data-theme="dark"]{--bg:#14231f;--card:#1E3932;--ink:#ffffff;--soft:rgba(255,255,255,0.72);--brand:#d4e9e2;--accent:#00754A;--house:#d4e9e2;--light:#2b5148;--on:#ffffff;--shadow:none}
+
