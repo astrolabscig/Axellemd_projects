@@ -225,3 +225,12 @@ dialog input{padding:12px 14px;border:1px solid var(--line);border-radius:10px;b
 #pinDialog{width:min(400px,calc(100vw - 32px))}
 #pinDialog form{padding:24px;display:grid;gap:12px}
 .pin-big{margin:4px 0;font:700 44px/1 "JetBrains Mono",monospace;letter-spacing:8px;color:var(--ink);text-align:center;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:16px}
+
+.reach{display:inline-flex;align-items:center;gap:5px;margin-left:auto;font:600 11.5px/1 Inter,sans-serif;padding:5px 9px;border-radius:999px;white-space:nowrap}
+.reach svg{width:12px;height:12px}
+.reach-direct{background:color-mix(in srgb,var(--green) 18%,transparent);color:var(--green)}
+.reach-group{background:var(--surface-2);color:var(--muted)}
+.live{justify-content:space-between}
+.btn-text{background:transparent;border:0;color:var(--muted);text-decoration:underline;padding:8px 4px;font-size:13px;justify-self:center}
+#pinDialog .dlg-acts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#pinDialog .dlg-acts .btn{justify-content:center}

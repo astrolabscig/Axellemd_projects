@@ -40,22 +40,28 @@ function statusLine(state, status) {
   return 'On the shelf, free to borrow';
 }
 
-function actions(b, state, status, askHref, contactLabel) {
+function actions(b, state, status) {
   const btn = (action, label, icon, cls = 'btn-line') =>
     `<button class="btn ${cls}" type="button" data-act="${action}" data-book="${esc(b.id)}">${ICON[icon]}${label}</button>`;
-  const contact = `<a class="btn btn-dark" target="_blank" rel="noopener" href="${askHref}">${ICON.chat}${contactLabel}</a>`;
   const out = [];
   if (state.holder) {
     // Only the borrower can sign it back in, with their PIN.
     out.push(btn('returned', 'Return this book', 'back'));
   } else {
-    // Getting the book is step one: contact the lender. Signing it out is what they do after pick-up.
-    out.push(contact);
-    out.push(btn('borrowed', 'Got it — sign it out', 'book'));
+    // Borrow both records the loan AND opens the message to the lender (or the class
+    // group), in that order, so tapping it always ends with something to send.
+    out.push(btn('borrowed', 'Borrow', 'book', 'btn-dark'));
     if (state.reservation) out.push(btn('unreserved', 'Cancel my reservation', 'pin'));
     else out.push(btn('reserved', 'Reserve', 'pin'));
   }
   return out.join('');
+}
+
+/** Small badge on a free book: whether Borrow can message the lender directly, or only the class group. */
+function contactBadge(direct, live) {
+  return direct && live
+    ? `<span class="reach reach-direct">${ICON.chat}Lender contactable directly</span>`
+    : `<span class="reach reach-group">${ICON.chat}Reach via class group</span>`;
 }
 
 /** WhatsApp text announcing a book, with a link that opens the app on that book. */
@@ -72,6 +78,7 @@ function bookCard(b, i, shelf, events, live) {
   const st = STATUS[status];
   const direct = hasDirect(b);
   const askHref = live ? `api/contact?book=${encodeURIComponent(b.id)}` : wa(requestText(b, false));
+  const free = !state.holder;
   const remindMsg = `Hi, a quick reminder from the Borrow-a-Book Shelf: "${b.title}" is due back${state.due ? ` on ${shortDate(state.due)}` : ' soon'}. When can we arrange the return?`;
   return `<li class="book" id="book-${esc(b.id)}" style="--st:${st.color}">
     <div class="cover" style="background:${coverFor(i)}" aria-hidden="true">
@@ -85,7 +92,7 @@ function bookCard(b, i, shelf, events, live) {
       <h3 style="margin-top:6px">${esc(b.title)}</h3>
       <p class="by">${esc(b.author)}</p>
     </div>
-    <p class="live"><i></i><span>${statusLine(state, status)}</span></p>
+    <p class="live"><i></i><span>${statusLine(state, status)}</span>${free ? contactBadge(direct, live) : ''}</p>
     <dl class="slip">
       <div><dt>CONDITION</dt><dd>${esc(b.condition || 'Ask the lender')}</dd></div>
       <div><dt>KEEP FOR</dt><dd>${esc(b.keep || 'Ask the lender')}</dd></div>
@@ -95,8 +102,9 @@ function bookCard(b, i, shelf, events, live) {
       <div><dt>COST</dt><dd>Free to borrow</dd></div>
     </dl>
     ${b.note ? `<p class="note">${esc(b.note)}</p>` : ''}
-    <div class="acts">${actions(b, state, status, askHref, direct && live ? 'Message the lender' : 'Ask in the class group')}</div>
+    <div class="acts" data-ask="${esc(askHref)}">${actions(b, state, status)}</div>
     <div class="remind">
+      ${free ? `<a class="mini" target="_blank" rel="noopener" href="${askHref}">${ICON.chat}Just ask first, don't borrow yet</a>` : ''}
       <a class="mini" target="_blank" rel="noopener" href="${calendarLink(b, state.due)}">${ICON.cal}Set a return reminder</a>
       ${state.holder ? `<a class="mini" target="_blank" rel="noopener" href="${wa(remindMsg)}">${ICON.bell}Lender: remind borrower</a>` : ''}
       <a class="mini" target="_blank" rel="noopener" href="${wa(shareText(b))}">${ICON.share}Share to the group</a>

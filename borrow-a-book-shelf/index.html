@@ -166,7 +166,11 @@
     <h3 id="pinDialogTitle">Keep this PIN</h3>
     <p class="pin-big" id="pinValue"></p>
     <p class="dlg-help" id="pinDialogText"></p>
-    <div class="dlg-acts"><button type="button" class="btn btn-line" id="pinCopy">Copy</button><button type="button" class="btn btn-grad" id="pinDone">Got it</button></div>
+    <div class="dlg-acts">
+      <button type="button" class="btn btn-line" id="pinCopy">Copy PIN</button>
+      <a class="btn btn-grad" id="pinMessageLink" target="_blank" rel="noopener" href="#">Message the lender</a>
+    </div>
+    <button type="button" class="btn btn-text" id="pinDone">I'll message them myself, close this</button>
   </form>
 </dialog>
 <dialog id="lendDialog" aria-labelledby="lendTitle">

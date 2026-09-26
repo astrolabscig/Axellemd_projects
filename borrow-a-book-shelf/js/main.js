@@ -1,6 +1,6 @@
 // Entry point: loads the shelf, connects to the live data, and wires up the page.
 import { wa, shortDate } from './utils.js';
-import { keepDays, addDays, todayISO, deriveState, statusOf } from './status.js';
+import { keepDays, addDays, todayISO, deriveState, statusOf, hasDirect } from './status.js';
 import { createStore } from './store.js';
 import { renderHeroShelf, renderCatalogue, renderRecord, shareText } from './render.js';
 
@@ -51,13 +51,15 @@ const DONE = { borrowed: 'Signed out', returned: 'Returned', reserved: 'Reserved
 function openDialog(action, bookId) {
   const b = allBooks().find((x) => x.id === bookId);
   const state = deriveState(store.events, bookId);
-  pending = { action, bookId };
+  const card = document.getElementById(`book-${bookId}`);
+  const askHref = card?.querySelector('.acts')?.dataset.ask || '';
+  pending = { action, bookId, askHref };
   $('#dlgTitle').textContent = TITLES[action];
   const bookLine = $('#dlgBook'); if (bookLine) bookLine.textContent = `${b.title} · ${b.author}`;
   $('#dlgHelp').textContent = {
-    borrowed: 'Do this once the book is actually in your hands. It signs the book out to you so the class knows it\'s taken. You\'ll get a private return PIN to keep.',
+    borrowed: 'This marks the book as yours and gives you a private return PIN. Next you\'ll get a message ready to send the lender to arrange pick-up.',
     returned: 'Signing it back in frees the book for the next person. You need the return PIN you got when you borrowed it.',
-    reserved: 'Reserve it to be next in line. You\'ll get a PIN so only you can cancel. Then message the lender to arrange pick-up.',
+    reserved: 'Reserve it to be next in line and get a PIN so only you can cancel. Next you\'ll get a message ready to send the lender.',
     unreserved: 'Cancel your reservation so someone else can take the book. You need the PIN you got when you reserved.',
   }[action];
   $('#dueRow').hidden = action !== 'borrowed';
@@ -88,7 +90,7 @@ async function submitDialog(e) {
     $('#actDialog').close();
     render();
     try { localStorage.setItem('borrow-a-book-code', input.code); } catch { /* ignore */ }
-    if (pin) showPin(input.action, b, event, pin);
+    if (pin) showPin(input.action, b, event, pin, pending.askHref, hasDirect(b) && store.mode === 'live');
     else toast(`${DONE[input.action]}: ${b.title}${event.due ? `, due back ${shortDate(event.due)}` : ''}.`);
   } catch (err) {
     $('#dlgError').textContent = err.message;
@@ -137,12 +139,15 @@ async function submitLend(e) {
 }
 
 // After borrowing or reserving, show the private PIN the person needs to return / cancel.
-function showPin(action, book, event, pin) {
-  $('#pinDialogTitle').textContent = action === 'borrowed' ? 'Signed out — keep this PIN' : 'Reserved — keep this PIN';
+function showPin(action, book, event, pin, askHref, direct) {
+  $('#pinDialogTitle').textContent = action === 'borrowed' ? 'Borrowed — keep this PIN' : 'Reserved — keep this PIN';
   $('#pinValue').textContent = pin;
   $('#pinDialogText').textContent = action === 'borrowed'
-    ? `"${book.title}" is signed out to you, due back ${shortDate(event.due)}. You'll need this PIN to return it. It's saved on this phone, but write it down in case you switch devices.`
-    : `You're next in line for "${book.title}". You'll need this PIN to cancel or, later, to return it once you borrow. It's saved on this phone.`;
+    ? `"${book.title}" is marked as yours, due back ${shortDate(event.due)}. You'll need this PIN to return it. Now message the lender to arrange pick-up.`
+    : `You're next in line for "${book.title}". You'll need this PIN to cancel or, later, to return it once you borrow. Message the lender so they know.`;
+  $('#pinMessageLink').href = askHref || '#';
+  $('#pinMessageLink').textContent = direct ? 'Message the lender' : 'Ask in the class group';
+  $('#pinMessageLink').hidden = !askHref;
   try { const store = JSON.parse(localStorage.getItem('borrow-a-book-pins') || '{}'); store[book.id] = pin; localStorage.setItem('borrow-a-book-pins', JSON.stringify(store)); } catch { /* ignore */ }
   $('#pinDialog').showModal();
 }
