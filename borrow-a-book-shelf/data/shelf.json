@@ -15,7 +15,8 @@
       "lender": "L1",
       "condition": "Good: no writing or torn pages, cover in good shape",
       "keep": "2 weeks",
-      "note": "The lender will need it back after two weeks."
+      "note": "The lender will need it back after two weeks.",
+      "contact": "v1:FX//FxgEBJL5bdB6gzPdUfo5quQPCudSaj21ioQmcy8FZlut3GH8Wg=="
     },
     {
       "id": "b2",
@@ -25,7 +26,8 @@
       "lender": "L2",
       "condition": "Good: no damage",
       "keep": "Until the lender needs it back",
-      "note": "The lender may need this back at any time. You'll get 2 days' notice to return it."
+      "note": "The lender may need this back at any time. You'll get 2 days' notice to return it.",
+      "contact": "v1:NnfpuZ87Sa4cQLLV5J7WZQZNcemf0+BkpiMRjNCi6uNa7F/YqI75Sw=="
     },
     {
       "id": "b3",
@@ -35,7 +37,8 @@
       "lender": "L3",
       "condition": "Almost new: no writing or marks",
       "keep": "1 week",
-      "note": "The lender prefers short loans, so please return it on time."
+      "note": "The lender prefers short loans, so please return it on time.",
+      "contact": "v1:Q1MgdgDolkadG+RkYa7fmnR8/yjH/F9x/ClXU2udImvae7oji908QQ=="
     },
     {
       "id": "b4",
@@ -46,7 +49,8 @@
       "lender": "L4",
       "condition": "Good shape",
       "keep": "2 weeks",
-      "note": ""
+      "note": "",
+      "contact": "v1:yVrhGoJIWOUc9sX8BY4ajaIhSayjTTiGhI6OFOQAtlgFdMFmubTBbg=="
     }
   ]
 }
