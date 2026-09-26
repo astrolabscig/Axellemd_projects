@@ -200,6 +200,13 @@
       "action": "reserved",
       "code": "B4",
       "at": "2026-09-26T17:49:15.543Z"
+    },
+    {
+      "id": "muiop9vzysmve",
+      "bookId": "b1",
+      "action": "unreserved",
+      "code": "B4",
+      "at": "2026-09-26T17:49:21.359Z"
     }
   ]
 }
