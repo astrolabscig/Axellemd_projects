@@ -1,0 +1,6 @@
+{
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- . ':(exclude)data/loans.json' ':(exclude)data/books.json'",
+  "headers": [
+    { "source": "/api/(.*)", "headers": [{ "key": "Cache-Control", "value": "no-store" }] }
+  ]
+}

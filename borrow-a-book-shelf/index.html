@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Borrow-a-Book Shelf</title>
+<meta name="description" content="Our class lending shelf: see which books classmates can lend, how long you can keep one, and how to borrow and return it.">
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<nav class="top"><div class="wrap">
+  <a class="logo" href="#top" aria-label="Borrow-a-Book Shelf home">
+    <img src="assets/logo.svg" alt="" width="34" height="34">
+    <span>Borrow-a-Book<small>class lending shelf</small></span>
+  </a>
+  <span class="links"><a href="#shelf">Catalogue</a><a href="#how">How to borrow</a><a href="#rules">Returns</a><a href="#record-sec">Activity</a><a href="#request">Request a book</a></span>
+</div></nav>
+
+<header class="hero" id="top"><div class="wrap">
+  <div>
+    <span class="kicker"><i></i>Hand-overs start when we're back on campus</span>
+    <h1>Borrow what your classmates <span class="grad">already own.</span></h1>
+    <p class="lead">See which books classmates can lend, how long you can keep one, and reserve it now. Most of us are at home, so books change hands once we're back on campus.</p>
+    <div class="cta">
+      <a class="btn btn-grad" href="#shelf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2Zm0 0a2 2 0 0 0 2 2h13"/><path d="M9 8h6M9 12h4"/></svg>See what's free now</a>
+      <a class="btn btn-ghost" href="#request" data-open="lend"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Lend a book</a>
+    </div>
+    <p class="hint"><b style="color:#fff">Always free.</b> Lenders don't charge. The only cost is replacing a book you lose or damage.</p>
+  </div>
+  <div class="shelf-art" aria-hidden="true">
+    <div class="shelf-row" id="heroShelf"></div>
+    <div class="plank"></div><div class="plank-glow"></div>
+    <div class="tag" style="left:2%;top:4%"><i style="background:var(--purple)"></i>Reserve now</div>
+    <div class="tag t2" style="right:0;top:22%"><i style="background:var(--green)"></i>Lend yours</div>
+  </div>
+</div></header>
+
+<main>
+
+  <section class="band" id="shelf"><div class="wrap">
+    <div class="sec-head">
+      <span class="callno">§ 01 · Catalogue</span>
+      <h2>On the shelf</h2>
+      <p>Each book shows its live status, who has it and when it's due. Tap Borrow, Return or Reserve on a book and everyone sees the change straight away.</p>
+    </div>
+    <p class="count"><span id="count"></span> · <a href="#request">Don't see your book? Ask the class</a></p>
+    <p class="demo" id="demoBanner" hidden>Demo mode: the live server isn't connected, so changes are saved only in this browser.</p>
+    <div class="toolbar">
+      <div class="filters" id="filters" role="group" aria-label="Show"><button type="button" data-f="all" aria-pressed="true">All</button><button type="button" data-f="free" aria-pressed="false">Free now</button><button type="button" data-f="out" aria-pressed="false">Out</button></div>
+      <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" type="search" placeholder="Search title, author or course" aria-label="Search books"></label>
+    </div>
+    <ul class="books" id="books"></ul>
+  </div></section>
+
+  <section class="band" id="how" style="padding-top:0"><div class="wrap">
+    <div class="sec-head">
+      <span class="callno">§ 02 · How to borrow</span>
+      <h2>From shelf to your bag, and back</h2>
+    </div>
+    <ol class="journey">
+      <li><div class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></div><div><span class="n"></span><h3>Find a free book</h3><p>Look for the green Available or blue Returned bookmark on a book below.</p></div></li>
+      <li><div class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z"/></svg></div><div><span class="n"></span><h3>Ask or reserve</h3><p>Message the lender from the book. While we're at home, tap Reserve to be first in line when campus resumes.</p></div></li>
+      <li><div class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2Zm0 0a2 2 0 0 0 2 2h13"/><path d="m9 10 2 2 4-4"/></svg></div><div><span class="n"></span><h3>Tap Borrow at pick-up</h3><p>Enter your borrower code and the due date you agreed. Check the condition together, then set a return reminder.</p></div></li>
+      <li><div class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></div><div><span class="n"></span><h3>Tap Return</h3><p>Hand the book back by the due date, then tap Return with your code.</p></div></li>
+    </ol>
+  </div></section>
+
+  <section class="band" style="padding-top:0"><div class="wrap">
+    <div class="sec-head">
+      <span class="callno">§ 03 · Status</span>
+      <h2>Every book wears a bookmark</h2>
+      <p>Every book shows one of these, updated live, so you can read the shelf at a glance.</p>
+    </div>
+    <ul class="marks">
+      <li class="mark c-available"><h3>Available</h3><p>With the lender, free to borrow.</p></li>
+      <li class="mark c-borrowed"><h3>Borrowed</h3><p>Someone has it. Their code and due date are on the book.</p></li>
+      <li class="mark c-reserved"><h3>Reserved</h3><p>Promised to the next person in line.</p></li>
+      <li class="mark c-returned"><h3>Returned</h3><p>Back with the lender, free again.</p></li>
+      <li class="mark c-overdue"><h3>Overdue</h3><p>Past its due date. Two days before, it shows Due soon in yellow.</p></li>
+    </ul>
+  </div></section>
+
+  <section class="band" id="rules" style="padding-top:0"><div class="wrap rules-wrap">
+    <div class="sec-head">
+      <span class="callno">§ 04 · Returns</span>
+      <h2>If a book doesn't come back</h2>
+      <p>Every loan has a due date, an automatic late flag, and a clear chain of people who follow up. Lenders lend with confidence; borrowers know what's expected.</p>
+    </div>
+    <div class="index-card">
+      <span class="stamp">SHELF RULES</span>
+      <h3>Borrowing card</h3>
+      <ol>
+        <li><span><b>Due date is set at pick-up.</b> Lender and borrower agree it, and the borrower enters it when tapping Borrow.</span></li>
+        <li><span><b>Late books are flagged.</b> The shelf marks a book Overdue the day after it's due, by borrower code only.</span></li>
+        <li><span><b>Reminders are built in.</b> Borrowers set a calendar reminder at pick-up. Two days before the due date, the book shows Due soon and the lender sends a one-tap reminder from its card.</span></li>
+        <li><span><b>Then follow-up.</b> Still out 3 days after the due date, the shelf keeper follows up. After a week, the class rep steps in.</span></li>
+        <li><span><b>One overdue, no new loans.</b> A borrower with an overdue book can't borrow another until it's back.</span></li>
+        <li><span><b>Lender needs it back.</b> The borrower returns it within 2 days of being asked.</span></li>
+        <li><span><b>Borrowing is free.</b> Nobody pays to borrow. <b>Lost or damaged:</b> the borrower replaces it or settles a fair amount with the lender. Agree the book's condition at pick-up, especially for older books.</span></li>
+      </ol>
+    </div>
+  </div></section>
+
+  <section class="band" style="padding-top:0"><div class="wrap">
+    <div class="sec-head">
+      <span class="callno">§ 05 · Who does what</span>
+      <h2>Responsibility is shared</h2>
+    </div>
+    <div class="roles">
+      <div class="role"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2ZM22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7Z"/></svg></div><h3>Borrowers</h3><p>Tap Borrow and Return themselves, and bring books back on time in the same condition.</p></div>
+      <div class="role"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 11V7a5 5 0 0 1 10 0v4"/><rect x="4" y="11" width="16" height="10" rx="2"/></svg></div><h3>Lenders</h3><p>Set their book's terms, check its condition at hand-over, and send the first reminder if it's late.</p></div>
+      <div class="role key"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="15" r="4"/><path d="m10.8 12.2 9.2-9.2M17 6l3 3M14 9l2 2"/></svg></div><h3>Shelf keeper</h3><p id="keeperText"></p></div>
+      <div class="role"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3 3 7l9 4 9-4Z"/><path d="M7 9v5c0 1.5 2.2 3 5 3s5-1.5 5-3V9"/></svg></div><h3>Class rep</h3><p>Approved the shelf and handles anything unresolved, including books that stay overdue.</p></div>
+    </div>
+  </div></section>
+
+  <section class="band" id="record-sec" style="padding-top:0"><div class="wrap">
+    <div class="sec-head">
+      <span class="callno">§ 06 · Lending record</span>
+      <h2>Recent activity</h2>
+      <p>Every borrow, return and reservation, by code only. The full history is kept in the project's repository.</p>
+    </div>
+    <ul class="record" id="record"></ul>
+  </div></section>
+
+  <section class="band" id="request" style="padding-top:0"><div class="wrap">
+    <div class="request">
+      <div>
+        <span class="callno" style="color:#07c3f2">§ 07 · Can't find it?</span>
+        <h2 style="margin-top:10px">Request a book, or lend one</h2>
+        <p>Got a book to lend? List it here in a minute. You'll get a ready message to post in the class group, with a link that opens straight to your book.</p>
+        <p>Not sure anyone in the class has it? Ask once here, and anyone who does can reply. Borrowing is always free.</p>
+      </div>
+      <div class="cta" style="margin-top:0">
+        <a class="btn btn-grad" id="reqBtn" target="_blank" rel="noopener" href="#">Ask the class for a book</a>
+        <button class="btn btn-ghost" type="button" data-open="lend">List a book to lend</button>
+      </div>
+    </div>
+  </div></section>
+</main>
+
+<footer><div class="wrap">
+  <span>Borrowers and lenders appear as codes, never names or phone numbers. Only the shelf keeper knows who each code belongs to.</span>
+  <span class="callno">v2 · Borrow-a-Book Shelf</span>
+</div></footer>
+
+<dialog id="actDialog" aria-labelledby="dlgTitle">
+  <form id="actForm" method="dialog">
+    <h3 id="dlgTitle">Borrow this book</h3>
+    <p class="callno" id="dlgBook"></p>
+    <p class="dlg-help" id="dlgHelp"></p>
+    <label>Your borrower code<input id="dlgCode" required autocomplete="off" placeholder="e.g. B4" pattern="[Bb][0-9]{1,3}"></label>
+    <label id="dueRow">Due back on<input id="dlgDue" type="date"></label>
+    <p class="dlg-small">No code yet? Ask the shelf keeper. Codes keep names off the page.</p>
+    <p class="dlg-error" id="dlgError" role="alert"></p>
+    <div class="dlg-acts"><button type="button" class="btn btn-line" id="dlgCancel">Cancel</button><button type="submit" class="btn btn-dark" id="dlgSubmit">Confirm</button></div>
+  </form>
+</dialog>
+<dialog id="lendDialog" aria-labelledby="lendTitle">
+  <form id="lendForm" method="dialog">
+    <div id="lendStep1">
+      <h3 id="lendTitle">List a book to lend</h3>
+      <p class="dlg-help">It goes on the shelf straight away. Borrowing is always free.</p>
+      <div class="lend-grid">
+        <label class="span2">Title<input name="title" required maxlength="120" placeholder="e.g. Clean Code"></label>
+        <label>Author<input name="author" required maxlength="80"></label>
+        <label>Course or category<input name="course" maxlength="60" placeholder="e.g. Programming"></label>
+        <label class="span2">Condition<input name="condition" required maxlength="120" placeholder="e.g. Good, no writing or torn pages"></label>
+        <label>Keep it for<input name="keep" required maxlength="60" placeholder="e.g. 2 weeks"></label>
+        <label>Your area (optional)<input name="area" maxlength="40" list="areas" placeholder="e.g. Kotei, Ayeduase, a hall"></label>
+        <label class="span2">Your lender code<input name="lender" maxlength="4" placeholder="Leave blank to get a new code" pattern="[Ll][0-9]{1,3}"></label>
+        <label class="check span2"><input type="checkbox" name="contactOptIn"> Let borrowers message me directly on WhatsApp</label>
+        <label class="span2" id="phoneRow" hidden>Your WhatsApp number<input name="phone" type="tel" inputmode="tel" maxlength="20" placeholder="e.g. 024 123 4567">
+          <span class="dlg-small">Stored encrypted and never shown on the page. A borrower only sees it in WhatsApp after tapping "Message the lender". If you leave this off, requests go to the class group instead.</span></label>
+        <label class="span2">Note for borrowers (optional)<input name="note" maxlength="200" placeholder="e.g. I may need it back before exams"></label>
+      </div>
+      <p class="dlg-small">Area helps borrowers know if you're nearby: just the neighbourhood or hall, no house numbers. Keep names, emails and numbers out of the other fields.</p>
+      <p class="dlg-error" id="lendError" role="alert"></p>
+      <div class="dlg-acts"><button type="button" class="btn btn-line" id="lendCancel">Cancel</button><button type="submit" class="btn btn-grad" id="lendSubmit">List book</button></div>
+    </div>
+    <div id="lendStep2" hidden>
+      <h3>Listed</h3>
+      <p class="dlg-help" id="lendDone"></p>
+      <p class="dlg-small">Now post it to the class group. The message links straight to your book, so anyone can borrow or reserve it in one tap.</p>
+      <div class="dlg-acts"><button type="button" class="btn btn-line" id="lendClose">Done</button><a class="btn btn-grad" id="lendShare" target="_blank" rel="noopener" href="#">Post to the class group</a></div>
+    </div>
+  </form>
+</dialog>
+<datalist id="areas"><option value="On campus (hall)"><option value="Ayeduase"><option value="Kotei"><option value="Bomso"><option value="Ayigya"><option value="Kentinkrono"><option value="Boadi"></datalist>
+<div class="toast" id="toast" role="status" hidden></div>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

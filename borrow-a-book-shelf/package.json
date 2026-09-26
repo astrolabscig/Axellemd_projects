@@ -1,0 +1,6 @@
+{
+  "name": "borrow-a-book-shelf",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=18" }
+}

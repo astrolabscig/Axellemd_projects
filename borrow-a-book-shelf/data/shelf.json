@@ -1,0 +1,52 @@
+{
+  "shelf": {
+    "keeper": "Joseph",
+    "where": "Once we're back on campus: after lectures, at a time agreed with the lender",
+    "sheetUrl": "",
+    "formUrl": "",
+    "listUrl": ""
+  },
+  "books": [
+    {
+      "id": "b1",
+      "title": "Discrete Mathematics",
+      "author": "Kenneth H. Rosen",
+      "course": "Discrete Mathematics",
+      "lender": "L1",
+      "condition": "Good: no writing or torn pages, cover in good shape",
+      "keep": "2 weeks",
+      "note": "The lender will need it back after two weeks."
+    },
+    {
+      "id": "b2",
+      "title": "The Psychology of Money",
+      "author": "Morgan Housel",
+      "course": "Personal finance",
+      "lender": "L2",
+      "condition": "Good: no damage",
+      "keep": "Until the lender needs it back",
+      "note": "The lender may need this back at any time. You'll get 2 days' notice to return it."
+    },
+    {
+      "id": "b3",
+      "title": "Atomic Habits",
+      "author": "James Clear",
+      "course": "Self-development",
+      "lender": "L3",
+      "condition": "Almost new: no writing or marks",
+      "keep": "1 week",
+      "note": "The lender prefers short loans, so please return it on time."
+    },
+    {
+      "id": "b4",
+      "title": "The Conscious, Unconscious and Super-Conscious Mind",
+      "spine": "The Conscious Mind",
+      "author": "Gurdip Hari",
+      "course": "Mind and personal growth",
+      "lender": "L4",
+      "condition": "Good shape",
+      "keep": "2 weeks",
+      "note": ""
+    }
+  ]
+}
