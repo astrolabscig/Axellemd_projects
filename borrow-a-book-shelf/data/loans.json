@@ -103,6 +103,14 @@
       "action": "returned",
       "code": "B4",
       "at": "2026-09-26T17:27:39.856Z"
+    },
+    {
+      "id": "muinxoc07kdqc",
+      "bookId": "b4",
+      "action": "borrowed",
+      "code": "B6",
+      "due": "2026-10-10",
+      "at": "2026-09-26T17:27:53.712Z"
     }
   ]
 }
