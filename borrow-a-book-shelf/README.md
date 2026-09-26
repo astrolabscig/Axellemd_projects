@@ -61,12 +61,20 @@ When listing, a lender can tick **Let borrowers message me directly on WhatsApp*
 └── vercel.json
 ```
 
+## Getting a book (borrowing is a two-step, human + app flow)
+
+The app records loans; it does not deliver books. So:
+
+1. **Contact the lender** — the main button on a free book messages the lender (or the class group). Agree a pick-up.
+2. **Sign it out** — after the book is in hand, tap **Got it — sign it out**, enter your borrower code and the due date. The app shows a **4-digit return PIN**, saved on your phone.
+3. **Return it** — tap **Return this book** and enter that PIN. Only the borrower has it, so nobody else can free your book.
+
 ## Rules the app enforces
 
 - Borrower codes look like `B4`. No names.
 - You can only borrow a book nobody has. If it's reserved, only the person who reserved it can borrow it.
-- Only the person who has a book can mark it returned.
-- One reservation per book. Only the person who reserved it can cancel.
+- Only the person who has a book can mark it returned, and only with the private 4-digit PIN issued when they borrowed it. Borrower codes are hidden on the shelf, and PINs are never stored in the clear (only a salted SHA-256 hash is kept).
+- One reservation per book. Cancelling needs the reservation PIN.
 - Due dates must be between today and 60 days from now.
 - Listings need a title, author, condition and loan length, and are rejected if they contain a phone number or email.
 - Status is worked out from the log: Available, Returned, Reserved, Borrowed, Due soon (2 days or less), Overdue.
@@ -99,7 +107,7 @@ When listing, a lender can tick **Let borrowers message me directly on WhatsApp*
 
 ## Privacy
 
-Everything in `data/` can be read by anyone who can see the repo, and the page shows codes to the whole class. Only codes, book details, areas, dates and (for lenders who opt in) encrypted WhatsApp numbers are stored. Never put names, phone numbers or index numbers in `shelf.json`, `books.json` or `loans.json`.
+Everything in `data/` can be read by anyone who can see the repo, and the page shows codes to the whole class. Only codes, book details, areas, dates and (for lenders who opt in) encrypted WhatsApp numbers are stored. Never put names, phone numbers or index numbers in `shelf.json`, `books.json` or `loans.json`. Return PINs are stored only as salted hashes, so even someone reading the repo can't return other people's books.
 
 ## Limits
 
