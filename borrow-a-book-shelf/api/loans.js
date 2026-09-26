@@ -6,7 +6,7 @@
 //   GITHUB_REPO    e.g. astrolabscig/borrow-a-book-shelf
 //   GITHUB_BRANCH  optional, default "main"
 //   DATA_DIR       optional, default "data"
-import { validateAction, todayISO, newId, publicBook } from '../js/status.js';
+import { validateAction, todayISO, newId, publicBook, publicEvent } from '../js/status.js';
 import { config, readJSON, writeJSON, parseBody, allBooks, sendError } from './_github.js';
 
 export default async function handler(req, res) {
@@ -15,7 +15,7 @@ export default async function handler(req, res) {
     const c = config();
     if (req.method === 'GET') {
       const [{ data }, { listed }] = await Promise.all([readJSON(c, 'loans.json'), allBooks(c)]);
-      return res.status(200).json({ events: data?.events || [], books: listed.map(publicBook) });
+      return res.status(200).json({ events: (data?.events || []).map(publicEvent), books: listed.map(publicBook) });
     }
     if (req.method !== 'POST') {
       res.setHeader('Allow', 'GET, POST');
@@ -27,14 +27,14 @@ export default async function handler(req, res) {
     for (let attempt = 0; attempt < 3; attempt++) {
       const { data, sha } = await readJSON(c, 'loans.json');
       const events = data?.events || [];
-      const check = validateAction(events, books, input, todayISO());
-      if (!check.ok) return res.status(409).json({ error: check.error, events });
+      const check = await validateAction(events, books, input, todayISO());
+      if (!check.ok) return res.status(409).json({ error: check.error, events: events.map(publicEvent) });
       const event = { id: newId(), ...check.event, at: new Date().toISOString() };
       const title = books.find((b) => b.id === event.bookId)?.title || event.bookId;
       const message = `${event.action}: ${title} (${event.code}${event.due ? `, due ${event.due}` : ''})`;
       const next = [...events, event];
       if (await writeJSON(c, 'loans.json', { events: next }, sha, message)) {
-        return res.status(201).json({ event, events: next });
+        return res.status(201).json({ event: publicEvent(event), pin: check.pin || null, events: next.map(publicEvent) });
       }
     }
     return res.status(409).json({ error: 'Someone else just updated the shelf. Refresh and try again.' });

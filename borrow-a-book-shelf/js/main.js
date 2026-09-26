@@ -44,8 +44,9 @@ function focusBook() {
 }
 
 // ---------- Borrow / return / reserve ----------
-const TITLES = { borrowed: 'Borrow', returned: 'Return', reserved: 'Reserve', unreserved: 'Cancel reservation' };
-const DONE = { borrowed: 'Borrowed', returned: 'Returned', reserved: 'Reserved', unreserved: 'Reservation cancelled' };
+const TITLES = { borrowed: 'Sign out this book', returned: 'Return this book', reserved: 'Reserve this book', unreserved: 'Cancel reservation' };
+const SUBMIT = { borrowed: 'Sign it out', returned: 'Return it', reserved: 'Reserve it', unreserved: 'Cancel reservation' };
+const DONE = { borrowed: 'Signed out', returned: 'Returned', reserved: 'Reserved', unreserved: 'Reservation cancelled' };
 
 function openDialog(action, bookId) {
   const b = allBooks().find((x) => x.id === bookId);
@@ -54,17 +55,19 @@ function openDialog(action, bookId) {
   $('#dlgTitle').textContent = TITLES[action];
   const bookLine = $('#dlgBook'); if (bookLine) bookLine.textContent = `${b.title} · ${b.author}`;
   $('#dlgHelp').textContent = {
-    borrowed: 'Borrowing is free. Agree the due date with the lender when you pick the book up, then tap Borrow.',
-    returned: `Tap Return once the book is back with the lender. Only ${state.holder}, who has it, can return it.`,
-    reserved: 'Reserve it and you are next in line. It stays reserved for you until you borrow it or cancel.',
-    unreserved: `Only ${state.reservation}, who reserved it, can cancel.`,
+    borrowed: 'Do this once the book is actually in your hands. It signs the book out to you so the class knows it\'s taken. You\'ll get a private return PIN to keep.',
+    returned: 'Signing it back in frees the book for the next person. You need the return PIN you got when you borrowed it.',
+    reserved: 'Reserve it to be next in line. You\'ll get a PIN so only you can cancel. Then message the lender to arrange pick-up.',
+    unreserved: 'Cancel your reservation so someone else can take the book. You need the PIN you got when you reserved.',
   }[action];
   $('#dueRow').hidden = action !== 'borrowed';
+  $('#pinRow').hidden = !(action === 'returned' || action === 'unreserved');
+  $('#dlgPin').value = (action === 'returned' || action === 'unreserved') ? savedPin(bookId) : '';
   const due = $('#dlgDue');
   due.min = todayISO();
   due.max = addDays(todayISO(), 60);
   due.value = addDays(todayISO(), keepDays(b.keep));
-  $('#dlgSubmit').textContent = TITLES[action];
+  $('#dlgSubmit').textContent = SUBMIT[action];
   $('#dlgError').textContent = '';
   $('#actDialog').showModal();
   $('#dlgCode').focus();
@@ -78,13 +81,15 @@ async function submitDialog(e) {
   $('#dlgError').textContent = '';
   const input = { ...pending, code: $('#dlgCode').value.trim().toUpperCase() };
   if (pending.action === 'borrowed') input.due = $('#dlgDue').value;
+  if (pending.action === 'returned' || pending.action === 'unreserved') input.pin = $('#dlgPin').value.trim();
   try {
-    const event = await store.act(input);
+    const { event, pin } = await store.act(input);
     const b = allBooks().find((x) => x.id === input.bookId);
     $('#actDialog').close();
     render();
-    toast(`${DONE[input.action]}: ${b.title}${event.due ? `, due back ${shortDate(event.due)}` : ''}.`);
     try { localStorage.setItem('borrow-a-book-code', input.code); } catch { /* ignore */ }
+    if (pin) showPin(input.action, b, event, pin);
+    else toast(`${DONE[input.action]}: ${b.title}${event.due ? `, due back ${shortDate(event.due)}` : ''}.`);
   } catch (err) {
     $('#dlgError').textContent = err.message;
     render();
@@ -131,6 +136,22 @@ async function submitLend(e) {
   }
 }
 
+// After borrowing or reserving, show the private PIN the person needs to return / cancel.
+function showPin(action, book, event, pin) {
+  $('#pinDialogTitle').textContent = action === 'borrowed' ? 'Signed out — keep this PIN' : 'Reserved — keep this PIN';
+  $('#pinValue').textContent = pin;
+  $('#pinDialogText').textContent = action === 'borrowed'
+    ? `"${book.title}" is signed out to you, due back ${shortDate(event.due)}. You'll need this PIN to return it. It's saved on this phone, but write it down in case you switch devices.`
+    : `You're next in line for "${book.title}". You'll need this PIN to cancel or, later, to return it once you borrow. It's saved on this phone.`;
+  try { const store = JSON.parse(localStorage.getItem('borrow-a-book-pins') || '{}'); store[book.id] = pin; localStorage.setItem('borrow-a-book-pins', JSON.stringify(store)); } catch { /* ignore */ }
+  $('#pinDialog').showModal();
+}
+
+// Prefill the PIN box on Return / cancel from what this phone saved at borrow time.
+function savedPin(bookId) {
+  try { return (JSON.parse(localStorage.getItem('borrow-a-book-pins') || '{}'))[bookId] || ''; } catch { return ''; }
+}
+
 function wire() {
   $('#reqBtn').href = wa('Hi everyone, does anyone have a copy of [book title] I could borrow for a short while? Borrowing is free. Borrow-a-Book Shelf request.');
   $('#keeperText').textContent =
@@ -147,6 +168,8 @@ function wire() {
   });
   $('#actForm').addEventListener('submit', submitDialog);
   $('#dlgCancel').addEventListener('click', () => $('#actDialog').close());
+  $('#pinDone').addEventListener('click', () => $('#pinDialog').close());
+  $('#pinCopy').addEventListener('click', async () => { try { await navigator.clipboard.writeText($('#pinValue').textContent); $('#pinCopy').textContent = 'Copied'; } catch { /* ignore */ } });
   document.querySelectorAll('[data-open="lend"]').forEach((b) => b.addEventListener('click', (e) => { e.preventDefault(); openLend(); }));
   $('#lendForm').addEventListener('submit', submitLend);
   $('#lendForm').contactOptIn.addEventListener('change', (e) => { $('#phoneRow').hidden = !e.target.checked; $('#lendForm').phone.required = e.target.checked; });

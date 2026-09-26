@@ -10,15 +10,23 @@ export const addDays = (iso, n) => new Date(Date.parse(iso) + n * DAY).toISOStri
 export const BORROWER_CODE = /^B\d{1,3}$/;
 export const ACTIONS = ['borrowed', 'returned', 'reserved', 'unreserved'];
 
-/** Replay the event log for one book to get who has it, until when, and who reserved it. */
+/**
+ * Replay the event log for one book to get who has it, until when, and who reserved it.
+ * `pin` fields hold the private PIN that guards Return / cancel-reservation. On events that
+ * reach the browser these are already stripped (the server only sends `pinHash`), so the
+ * public shelf never reveals them.
+ */
 export function deriveState(events, bookId) {
-  const s = { holder: null, due: null, reservation: null, last: null, at: null };
+  const s = { holder: null, due: null, reservation: null, last: null, at: null, holdPin: null, resPin: null };
   for (const e of events) {
     if (e.bookId !== bookId) continue;
-    if (e.action === 'borrowed') { s.holder = e.code; s.due = e.due; if (s.reservation === e.code) s.reservation = null; }
-    if (e.action === 'returned') { s.holder = null; s.due = null; }
-    if (e.action === 'reserved') s.reservation = e.code;
-    if (e.action === 'unreserved') s.reservation = null;
+    if (e.action === 'borrowed') {
+      s.holder = e.code; s.due = e.due; s.holdPin = e.pinHash || e.pin || null;
+      if (s.reservation === e.code) { s.reservation = null; s.resPin = null; }
+    }
+    if (e.action === 'returned') { s.holder = null; s.due = null; s.holdPin = null; }
+    if (e.action === 'reserved') { s.reservation = e.code; s.resPin = e.pinHash || e.pin || null; }
+    if (e.action === 'unreserved') { s.reservation = null; s.resPin = null; }
     s.last = e.action; s.at = e.at;
   }
   return s;
@@ -54,11 +62,33 @@ export function keepDays(keep = '') {
 
 const fail = (error) => ({ ok: false, error });
 
+/** A private 4-digit return PIN, shown to the borrower once and kept on their device. */
+export const PIN = /^\d{4}$/;
+export const makePin = () => String(Math.floor(1000 + Math.random() * 9000));
+
+/**
+ * Hash a PIN with a per-event salt so the stored log never contains the PIN itself.
+ * Uses Web Crypto (browser and modern Node). Returns "salt:hexdigest".
+ */
+export async function hashPin(pin, salt) {
+  salt = salt || (crypto.getRandomValues(new Uint8Array(8))).reduce((a, b) => a + b.toString(16).padStart(2, '0'), '');
+  const bytes = new TextEncoder().encode(salt + ':' + pin);
+  const digest = await crypto.subtle.digest('SHA-256', bytes);
+  const hex = [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
+  return salt + ':' + hex;
+}
+
+export async function pinMatches(pin, stored) {
+  if (!stored || !String(stored).includes(':')) return false;
+  const salt = String(stored).split(':')[0];
+  return (await hashPin(pin, salt)) === stored;
+}
+
 /**
  * Check a requested action against the current log.
  * input: { bookId, action, code, due? }  ->  { ok: true, event } | { ok: false, error }
  */
-export function validateAction(events, books, input = {}, today = todayISO()) {
+export async function validateAction(events, books, input = {}, today = todayISO()) {
   const book = books.find((b) => b.id === input.bookId);
   if (!book) return fail('That book is not on the shelf.');
   const action = input.action;
@@ -68,31 +98,42 @@ export function validateAction(events, books, input = {}, today = todayISO()) {
   const s = deriveState(events, book.id);
 
   if (action === 'borrowed') {
-    if (s.holder) return fail(`"${book.title}" is already borrowed by ${s.holder}.`);
-    if (s.reservation && s.reservation !== code) return fail(`"${book.title}" is reserved for ${s.reservation}.`);
+    if (s.holder) return fail(`"${book.title}" is already borrowed.`);
+    if (s.reservation && s.reservation !== code) return fail(`"${book.title}" is reserved for someone else.`);
     const due = String(input.due || '');
     if (!/^\d{4}-\d{2}-\d{2}$/.test(due) || Number.isNaN(Date.parse(due))) return fail('Pick the due date you agreed with the lender.');
     const d = daysBetween(today, due);
     if (d < 0) return fail("The due date can't be in the past.");
     if (d > 60) return fail('The due date must be within 60 days.');
-    return { ok: true, event: { bookId: book.id, action, code, due } };
+    const pin = makePin();
+    return { ok: true, pin, event: { bookId: book.id, action, code, due, pinHash: await hashPin(pin) } };
   }
   if (action === 'returned') {
     if (!s.holder) return fail(`"${book.title}" isn't borrowed right now.`);
-    if (s.holder !== code) return fail(`Only ${s.holder}, who has the book, can mark it returned.`);
+    if (s.holder !== code) return fail('That borrower code does not match who has this book.');
+    if (!(await pinMatches(String(input.pin || ''), s.holdPin))) {
+      return fail('Wrong PIN. Only the borrower has the return PIN shown when they borrowed the book. Ask the shelf keeper if you lost it.');
+    }
     return { ok: true, event: { bookId: book.id, action, code } };
   }
   if (action === 'reserved') {
-    if (s.reservation) return fail(`"${book.title}" is already reserved for ${s.reservation}.`);
+    if (s.reservation) return fail(`"${book.title}" is already reserved.`);
     if (s.holder === code) return fail('You already have this book.');
-    return { ok: true, event: { bookId: book.id, action, code } };
+    const pin = makePin();
+    return { ok: true, pin, event: { bookId: book.id, action, code, pinHash: await hashPin(pin) } };
   }
   // unreserved
-  if (s.reservation !== code) return fail('Only the person who reserved it can cancel the reservation.');
+  if (s.reservation !== code) return fail('That code does not match who reserved this book.');
+  if (!(await pinMatches(String(input.pin || ''), s.resPin))) {
+    return fail('Wrong PIN. Only the person who reserved it has the PIN.');
+  }
   return { ok: true, event: { bookId: book.id, action, code } };
 }
 
 export const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+/** Events as the browser may see them: keep pinHash (needed to verify a return) but never a raw pin. */
+export const publicEvent = ({ pin, ...rest }) => rest;
 
 // ---------- Listings (lenders adding their own books) ----------
 

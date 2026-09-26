@@ -221,3 +221,7 @@ dialog input{padding:12px 14px;border:1px solid var(--line);border-radius:10px;b
 
 #lendDialog label.check{display:flex;align-items:center;gap:10px;color:var(--ink);font-size:14.5px}
 #lendDialog label.check input{width:20px;height:20px;accent-color:#6b57ff;padding:0}
+
+#pinDialog{width:min(400px,calc(100vw - 32px))}
+#pinDialog form{padding:24px;display:grid;gap:12px}
+.pin-big{margin:4px 0;font:700 44px/1 "JetBrains Mono",monospace;letter-spacing:8px;color:var(--ink);text-align:center;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:16px}

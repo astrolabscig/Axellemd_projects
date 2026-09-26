@@ -1,7 +1,7 @@
 // Data layer. On Vercel it talks to /api/loans and /api/books (live, shared by everyone).
 // Anywhere else (e.g. a local static server) it falls back to demo mode,
 // which keeps changes in this browser only, so you can try the UI offline.
-import { validateAction, validateListing, todayISO, newId } from './status.js';
+import { validateAction, validateListing, todayISO, newId, publicEvent } from './status.js';
 
 const DEMO_EVENTS = 'borrow-a-book-demo-events';
 const DEMO_BOOKS = 'borrow-a-book-demo-books';
@@ -31,7 +31,7 @@ async function liveStore() {
       try {
         const j = await postJSON('api/loans', input);
         store.events = j.events;
-        return j.event;
+        return { event: j.event, pin: j.pin || null };
       } catch (err) {
         if (Array.isArray(err.body?.events)) store.events = err.body.events;
         throw err;
@@ -60,12 +60,12 @@ async function demoStore(baseBooks) {
     get listed() { return listed; },
     async refresh() {},
     async act(input) {
-      const check = validateAction(events, [...baseBooks, ...listed], input, todayISO());
+      const check = await validateAction(events, [...baseBooks, ...listed], input, todayISO());
       if (!check.ok) throw new Error(check.error);
       const event = { id: newId(), ...check.event, at: new Date().toISOString() };
       events = [...events, event];
-      save(DEMO_EVENTS, events);
-      return event;
+      save(DEMO_EVENTS, events); // full events (with pinHash) stay in this browser only
+      return { event: publicEvent(event), pin: check.pin || null };
     },
     async list(input) {
       const check = validateListing([...baseBooks, ...listed], input);

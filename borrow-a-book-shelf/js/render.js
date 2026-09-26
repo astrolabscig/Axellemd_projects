@@ -33,24 +33,27 @@ export function renderHeroShelf(el, books) {
 function statusLine(state, status) {
   if (state.holder) {
     const when = status === 'overdue' ? `was due ${shortDate(state.due)}` : `due back ${shortDate(state.due)}`;
-    return `With <b>${esc(state.holder)}</b>, ${when}${state.reservation ? ` · next: <b>${esc(state.reservation)}</b>` : ''}`;
+    return `Borrowed, ${when}${state.reservation ? ' · someone is next in line' : ''}`;
   }
-  if (state.reservation) return `Reserved for <b>${esc(state.reservation)}</b>`;
+  if (state.reservation) return 'Reserved for the next person';
   if (status === 'returned') return 'Back with the lender, free to borrow';
   return 'On the shelf, free to borrow';
 }
 
-function actions(b, state, status) {
-  const btn = (action, label, icon, cls = 'btn-dark') =>
+function actions(b, state, status, askHref, contactLabel) {
+  const btn = (action, label, icon, cls = 'btn-line') =>
     `<button class="btn ${cls}" type="button" data-act="${action}" data-book="${esc(b.id)}">${ICON[icon]}${label}</button>`;
+  const contact = `<a class="btn btn-dark" target="_blank" rel="noopener" href="${askHref}">${ICON.chat}${contactLabel}</a>`;
   const out = [];
   if (state.holder) {
-    out.push(btn('returned', 'Return', 'back'));
-    if (!state.reservation) out.push(btn('reserved', 'Reserve next', 'pin', 'btn-line'));
+    // Only the borrower can sign it back in, with their PIN.
+    out.push(btn('returned', 'Return this book', 'back'));
   } else {
-    out.push(btn('borrowed', 'Borrow', 'book'));
-    if (state.reservation) out.push(btn('unreserved', 'Cancel reservation', 'pin', 'btn-line'));
-    else out.push(btn('reserved', 'Reserve', 'pin', 'btn-line'));
+    // Getting the book is step one: contact the lender. Signing it out is what they do after pick-up.
+    out.push(contact);
+    out.push(btn('borrowed', 'Got it — sign it out', 'book'));
+    if (state.reservation) out.push(btn('unreserved', 'Cancel my reservation', 'pin'));
+    else out.push(btn('reserved', 'Reserve', 'pin'));
   }
   return out.join('');
 }
@@ -92,9 +95,8 @@ function bookCard(b, i, shelf, events, live) {
       <div><dt>COST</dt><dd>Free to borrow</dd></div>
     </dl>
     ${b.note ? `<p class="note">${esc(b.note)}</p>` : ''}
-    <div class="acts">${actions(b, state, status)}</div>
+    <div class="acts">${actions(b, state, status, askHref, direct && live ? 'Message the lender' : 'Ask in the class group')}</div>
     <div class="remind">
-      <a class="mini" target="_blank" rel="noopener" href="${askHref}">${ICON.chat}${direct && live ? 'Message the lender' : 'Ask in the class group'}</a>
       <a class="mini" target="_blank" rel="noopener" href="${calendarLink(b, state.due)}">${ICON.cal}Set a return reminder</a>
       ${state.holder ? `<a class="mini" target="_blank" rel="noopener" href="${wa(remindMsg)}">${ICON.bell}Lender: remind borrower</a>` : ''}
       <a class="mini" target="_blank" rel="noopener" href="${wa(shareText(b))}">${ICON.share}Share to the group</a>
