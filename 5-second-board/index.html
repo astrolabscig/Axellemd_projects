@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The 5-Second Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+  <h1>The 5-Second Board</h1>
+  <p class="lede">A shared noticeboard for the whole department, online. Anyone can pin a notice for everyone to see. Each notice fits in four lines and takes itself down on its end date, so old papers never bury new ones.</p>
+
+  <nav class="zones" aria-label="Filter notices by zone" id="zones"></nav>
+  <button class="post" id="openPost">+ Post a notice</button>
+
+  <section class="list" id="list" aria-live="polite"></section>
+
+  <div class="health" id="health"></div>
+  <section class="list expired" id="expiredList" hidden></section>
+
+  <p class="note">Prototype by Joseph Boafo Afful for The Hidden Why (E360, Be Curious). Sample notices are fictional. Notices you post are saved only on this device.</p>
+</div>
+
+<dialog id="dlg">
+  <form id="form" novalidate>
+    <h2>Post a notice</h2>
+    <p class="hint">Four lines. If it can't be read in 5 seconds, it's too long.</p>
+    <label for="f-zone">Zone</label>
+    <select id="f-zone">
+      <option value="deadline">Deadline</option><option value="event">Event</option>
+      <option value="opportunity">Opportunity</option><option value="lost">Lost &amp; found</option>
+    </select>
+    <label for="f-what">What <span class="hint" id="count">(0/60)</span></label>
+    <input id="f-what" maxlength="60" placeholder="e.g. Hackathon sign-ups close Friday">
+    <label for="f-when">When</label>
+    <input id="f-when" placeholder="e.g. Fri, 4:00 pm">
+    <label for="f-where">Where</label>
+    <input id="f-where" placeholder="e.g. Google Form in class group">
+    <label for="f-action">What should people do? <span class="hint">(button text)</span></label>
+    <input id="f-action" maxlength="24" placeholder="e.g. Register">
+    <label for="f-exp">Remove this notice on <span class="hint">(required, within 30 days)</span></label>
+    <input id="f-exp" type="date">
+    <label for="f-from">Posted by <span class="hint">(group or office, not a person's number)</span></label>
+    <input id="f-from" placeholder="e.g. CS Society">
+    <p class="err" id="err" role="alert"></p>
+    <div class="row"><button type="button" id="cancel">Cancel</button><button class="primary" type="submit">Post notice</button></div>
+  </form>
+</dialog>
+<div class="toast" id="toast" role="status"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
